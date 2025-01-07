@@ -1,9 +1,9 @@
+import java.util.ArrayList;
 import java.util.Random;
+import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args){
-        greeting();
-
         int rows_number = 7;
         int columns_number = 7;
         int[][] show_map = map(rows_number, columns_number);
@@ -14,10 +14,16 @@ public class Main {
             }
             System.out.println();
         }
+
+        enter_coordinates(show_map, rows_number, columns_number);
     }
 
-    public static void greeting(){
+    public static void greeting(String enter_player_name){
         System.out.println("Sea-Battle");
+
+        ArrayList<String> players_list = new ArrayList<>();
+        players_list.add(enter_player_name);
+        System.out.println(players_list);
     }
 
     public static int[][] map(int rows_number, int columns_number){
@@ -95,5 +101,53 @@ public class Main {
         }
 
         return true;
+    }
+
+    public static void enter_coordinates(int[][] map, int rows, int columns){
+        Scanner scanner = new Scanner(System.in);
+        int total_ships_cells = 11;
+        int hit_ships = 0;
+
+        while(hit_ships < total_ships_cells){
+            int x = scanner.nextInt();
+            int y = scanner.nextInt();
+
+            if(x > 7 || x < 1 || y > 7 || y < 1){
+                boolean invalid_input = true;
+
+                while(invalid_input){
+                    System.out.println("Invalid Input, try again");
+
+                    x = scanner.nextInt();
+                    y = scanner.nextInt();
+
+                    if(x <= rows && x > 0 && y <= columns && y > 0){
+                        invalid_input = false;
+                    }
+                }
+            }
+
+            if(map[x - 1][y - 1] == 1){
+                map[x - 1][y - 1] = 2;
+                clear_console(map, rows, columns);
+                hit_ships++;
+            }else if(map[x - 1][y - 1] == 0){
+                map[x - 1][y - 1] = 3;
+                clear_console(map, rows, columns);
+            }
+        }
+    }
+
+    public static void clear_console(int[][] map, int rows_number, int columns_number){
+        for(int i = 0; i < 10; i++){
+            System.out.println();
+        }
+
+        for (int i = 0; i < rows_number; i++){
+            for (int j = 0; j < columns_number; j++){
+                System.out.print(map[i][j] + " ");
+            }
+            System.out.println();
+        }
     }
 }
