@@ -3,6 +3,7 @@ import java.util.Random;
 import java.util.Scanner;
 
 public class Main {
+    static ArrayList<ArrayList<int[]>> ships = new ArrayList<>();
     public static void main(String[] args){
         int rows_number = 7;
         int columns_number = 7;
@@ -45,6 +46,7 @@ public class Main {
 
     public static void placeShip(int[][] map, int size, int rows, int columns, Random random){
         boolean placed = false;
+        ArrayList<int[]> shipCoordinates = new ArrayList<>();
 
         while(!placed) {
             int random_row = random.nextInt(rows);
@@ -55,16 +57,20 @@ public class Main {
                 if(random_column + size <= columns && noShipsAround(map, random_row, random_column, size, rows, columns, true)) {
                     for (int i = 0; i < size; i++) {
                         map[random_row][random_column + i] = 1;
+                        shipCoordinates.add(new int[]{random_row, random_column + i});
                     }
 
+                    ships.add(shipCoordinates);
                     placed = true;
                 }
             } else {
                 if(random_row + size <= rows && noShipsAround(map, random_row, random_column, size, rows, columns, false)) {
                     for (int i = 0; i < size; i++) {
                         map[random_row + i][random_column] = 1;
+                        shipCoordinates.add(new int[]{random_row + i, random_column});
                     }
 
+                    ships.add(shipCoordinates);
                     placed = true;
                 }
             }
@@ -112,7 +118,7 @@ public class Main {
             int x = scanner.nextInt();
             int y = scanner.nextInt();
 
-            if(x > 7 || x < 1 || y > 7 || y < 1){
+            if(x > columns || x < 1 || y > rows || y < 1){
                 boolean invalid_input = true;
 
                 while(invalid_input){
@@ -127,12 +133,16 @@ public class Main {
                 }
             }
 
-            if(map[x - 1][y - 1] == 1){
-                map[x - 1][y - 1] = 2;
+            x--;
+            y--;
+
+            if(map[x][y] == 1){
+                map[x][y] = 2;
+                checkShipDestruction(map, rows, columns);
                 clear_console(map, rows, columns);
                 hit_ships++;
-            }else if(map[x - 1][y - 1] == 0){
-                map[x - 1][y - 1] = 3;
+            }else if(map[x][y] == 0){
+                map[x][y] = 3;
                 clear_console(map, rows, columns);
             }
         }
@@ -148,6 +158,42 @@ public class Main {
                 System.out.print(map[i][j] + " ");
             }
             System.out.println();
+        }
+    }
+
+    public static void checkShipDestruction(int[][] map, int rows, int columns){
+        for(ArrayList<int[]> ship : ships){
+            boolean destroyed = true;
+
+            for(int[] cell : ship){
+                if(map[cell[0]][cell[1]] != 2){
+                    destroyed = false;
+                    break;
+                }
+            }
+
+            if(destroyed){
+                markSurroundingCells(map, ship, rows, columns);
+                ships.remove(ship);
+            }
+        }
+    }
+
+    public static void markSurroundingCells(int[][] map, ArrayList<int[]> ship, int rows, int columns){
+        for(int[] cell : ship){
+            int row = cell[0];
+            int column = cell[1];
+
+            for(int i = -1; i <= 1; i++){
+                for(int j = -1; j<= 1; j++){
+                    int r = row + i;
+                    int c = column + j;
+
+                    if(r >= 0 && r < columns && c >= 0 && c < rows && map[r][c] == 0){
+                        map[r][c] = 4;
+                    }
+                }
+            }
         }
     }
 }
